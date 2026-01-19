@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A-Messenger</title>
-
-<style>
+<title>A-Messenger</title><style>
 body{
   margin:0;
   font-family: Arial, sans-serif;
@@ -99,42 +96,16 @@ button:hover{ background:#e64980; }
 }
 
 .hidden{ display:none; }
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-  <div class="header">A-Messenger</div>
-
-  <!-- LOGIN ONLY -->
-  <div id="login" class="controls">
+</style></head><body><div class="container">  <div class="header">A-Messenger</div>  <!-- LOGIN ONLY -->  <div id="login" class="controls">
     <input type="password" id="password" placeholder="Enter password">
     <button onclick="unlock()">Unlock</button>
-  </div>
-
-  <!-- CHAT AREA (HIDDEN UNTIL UNLOCK) -->
-  <div id="chat" class="chat"></div>
-
-  <div id="editor" class="controls hidden">
+  </div>  <!-- CHAT AREA (HIDDEN UNTIL UNLOCK) -->  <div id="chat" class="chat"></div>  <div id="editor" class="controls hidden">
     <textarea id="message" placeholder="Type a message..."></textarea>
     <div class="row">
       <button onclick="sendMessage('Prince')">Send as Prince</button>
       <button onclick="sendMessage('Arya')">Send as Arya</button>
     </div>
-  </div>
-
-</div>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<!-- CryptoJS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
-<script>
+  </div></div><!-- Firebase --><script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script><!-- CryptoJS --><script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script><script>
 const firebaseConfig = {
   apiKey: "AIzaSyCnyhV58WzDSR4kSPuH6aC8ojcfCW2qtgk",
   authDomain: "messenger-88e41.firebaseapp.com",
@@ -151,8 +122,15 @@ const db = firebase.database();
 let SECRET = "";
 
 function unlock(){
-  SECRET = document.getElementById("password").value;
-  if(SECRET.length < 4){ alert("Password too short"); return; }
+  const input = document.getElementById("password").value;
+
+  // CONFIRM PASSWORD HERE
+  if(input !== "10012007"){
+    alert("Invalid password");
+    return;
+  }
+
+  SECRET = input;
 
   document.getElementById("login").classList.add("hidden");
   document.getElementById("chat").style.display = "block";
@@ -194,7 +172,5 @@ function loadMessages(){
     }catch{}
   });
 }
-</script>
-
-</body>
+</script></body>
 </html>
