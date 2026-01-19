@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A-Messenger</title>
+
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(rgba(255,200,220,.9),rgba(255,200,220,.9)),
+  url("https://images.unsplash.com/photo-1588776814546-1ffcf47267a5");
+  background-size: cover;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.container{
+  width:360px;
+  background:#fff;
+  border-radius:16px;
+  box-shadow:0 10px 35px rgba(0,0,0,.25);
+  display:flex;
+  flex-direction:column;
+}
+
+.header{
+  padding:14px;
+  text-align:center;
+  font-weight:bold;
+  color:#c2255c;
+  border-bottom:1px solid #eee;
+}
+
+.chat{
+  flex:1;
+  padding:12px;
+  overflow-y:auto;
+  display:none;
+}
+
+.msg{
+  max-width:75%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:12px;
+  font-size:14px;
+}
+
+.left{
+  background:#f1f3f5;
+  align-self:flex-start;
+}
+
+.right{
+  background:#f06595;
+  color:#fff;
+  align-self:flex-end;
+}
+
+.time{
+  font-size:11px;
+  opacity:.7;
+  margin-top:4px;
+}
+
+.controls{
+  padding:12px;
+  border-top:1px solid #eee;
+}
+
+textarea,input,button{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:14px;
+}
+
+textarea{ resize:none; height:70px; }
+
+button{
+  background:#f06595;
+  color:white;
+  font-weight:bold;
+  border:none;
+  cursor:pointer;
+}
+
+button:hover{ background:#e64980; }
+
+.row{
+  display:flex;
+  gap:8px;
+}
+
+.hidden{ display:none; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">A-Messenger</div>
+
+  <!-- LOGIN ONLY -->
+  <div id="login" class="controls">
+    <input type="password" id="password" placeholder="Enter password">
+    <button onclick="unlock()">Unlock</button>
+  </div>
+
+  <!-- CHAT AREA (HIDDEN UNTIL UNLOCK) -->
+  <div id="chat" class="chat"></div>
+
+  <div id="editor" class="controls hidden">
+    <textarea id="message" placeholder="Type a message..."></textarea>
+    <div class="row">
+      <button onclick="sendMessage('Prince')">Send as Prince</button>
+      <button onclick="sendMessage('Arya')">Send as Arya</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<!-- CryptoJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCnyhV58WzDSR4kSPuH6aC8ojcfCW2qtgk",
+  authDomain: "messenger-88e41.firebaseapp.com",
+  databaseURL: "https://messenger-88e41-default-rtdb.firebaseio.com",
+  projectId: "messenger-88e41",
+  storageBucket: "messenger-88e41.appspot.com",
+  messagingSenderId: "235166258459",
+  appId: "1:235166258459:web:5818f717af9dd3e8e4efbe"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let SECRET = "";
+
+function unlock(){
+  SECRET = document.getElementById("password").value;
+  if(SECRET.length < 4){ alert("Password too short"); return; }
+
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("chat").style.display = "block";
+  document.getElementById("editor").classList.remove("hidden");
+
+  loadMessages();
+}
+
+function sendMessage(sender){
+  const text = document.getElementById("message").value;
+  if(!text) return;
+
+  const encrypted = CryptoJS.AES.encrypt(text, SECRET).toString();
+  const time = new Date().toLocaleString();
+
+  db.ref("chat").push({
+    sender: sender,
+    data: encrypted,
+    time: time
+  });
+
+  document.getElementById("message").value = "";
+}
+
+function loadMessages(){
+  db.ref("chat").on("child_added", snap => {
+    const msg = snap.val();
+    try{
+      const decrypted = CryptoJS.AES.decrypt(msg.data, SECRET)
+        .toString(CryptoJS.enc.Utf8);
+      if(!decrypted) return;
+
+      const div = document.createElement("div");
+      div.className = "msg " + (msg.sender === "Prince" ? "right" : "left");
+      div.innerHTML = `<b>${msg.sender}</b><br>${decrypted}<div class='time'>${msg.time}</div>`;
+
+      document.getElementById("chat").appendChild(div);
+      document.getElementById("chat").scrollTop = 99999;
+    }catch{}
+  });
+}
+</script>
+
+</body>
+</html>
